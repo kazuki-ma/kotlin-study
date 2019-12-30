@@ -1,0 +1,43 @@
+@startuml
+
+
+interface CoroutineContext
+CoroutineContext : key: Key<*>
+CoroutineContext : get(key: Key<E>): E?
+CoroutineContext : fold(initial: R, operation: (R, Element) -> R): R
+CoroutineContext : plus(context: CoroutineContext): CoroutineContext
+
+interface CoroutineContext.Element
+CoroutineContext.Element : public val key: Key<*>
+CoroutineContext.Element : override operator fun <E : Element> get(key: Key<E>): E?
+CoroutineContext.Element : override fun <R> fold(initial: R, operation: (R, Element) -> R): R
+CoroutineContext.Element : override fun minusKey(key: Key<*>): CoroutineContext
+
+interface ContinuationInterceptor
+ContinuationInterceptor : fun <T> interceptContinuation(continuation: Continuation<T>): Continuation<T>
+ContinuationInterceptor : fun releaseInterceptedContinuation(continuation: Continuation<*>)
+ContinuationInterceptor : override operator fun <E : CoroutineContext.Element> get(key: CoroutineContext.Key<E>): E?
+ContinuationInterceptor : override fun minusKey(key: CoroutineContext.Key<*>): CoroutineContext
+
+abstract class CoroutineDispatcher
+CoroutineDispatcher : abstract fun dispatch(context: CoroutineContext, block: Runnable)
+CoroutineDispatcher : open fun dispatchYield(context: CoroutineContext, block: Runnable) = dispatch(context, block)
+CoroutineDispatcher : final override fun <T> interceptContinuation(continuation: Continuation<T>): Continuation<T>
+CoroutineDispatcher : override fun releaseInterceptedContinuation(continuation: Continuation<*>)
+CoroutineDispatcher : operator fun plus(other: CoroutineDispatcher) = other
+CoroutineDispatcher : override fun toString(): String = "$classSimpleName@$hexAddress"
+
+abstract class AbstractCoroutineContextElement
+AbstractCoroutineContextElement : public override val key: Key<*>
+
+ContinuationInterceptor <|-- CoroutineDispatcher
+CoroutineContext.Element <|-- ContinuationInterceptor
+CoroutineContext <|-- CoroutineContext.Element
+
+CoroutineContext.Element <|-- AbstractCoroutineContextElement
+AbstractCoroutineContextElement <|-- CoroutineDispatcher
+
+interface "[[https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-coroutine-scope/index.html CoroutineScope]]" as CoroutineScope
+CoroutineScope : abstract val coroutineContext: CoroutineContext
+CoroutineScope -up-|> CoroutineContext: use
+@enduml

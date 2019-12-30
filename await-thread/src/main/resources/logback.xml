@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <!-- @formatter:off@formatter:off -->
+      <pattern>%d{HH:mm:ss.SSS} [%20.20thread] %highlight(%-5.5level) %cyan(%30.30logger{30}) - %-40msg %white(%replace(%caller{1}){'Caller\+0\s+', ' '})</pattern>
+      <charset>UTF-8</charset>
+    </encoder>
+  </appender>
+
+  <root level="DEBUG">
+    <appender-ref ref="CONSOLE" />
+  </root>
+</configuration>
